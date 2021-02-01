@@ -4,18 +4,20 @@
 
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
+
 Crytpo crytpoFromJson(String str) => Crytpo.fromJson(json.decode(str));
 
 String crytpoToJson(Crytpo data) => json.encode(data.toJson());
 
-class Crytpo {
+class Crytpo extends Equatable {
+  final List<Coin> data;
+  final Status status;
+
   Crytpo({
     this.data,
     this.status,
   });
-
-  List<Coin> data;
-  Status status;
 
   factory Crytpo.fromJson(Map<String, dynamic> json) => Crytpo(
         data: List<Coin>.from(json["data"].map((x) => Coin.fromJson(x))),
@@ -26,9 +28,12 @@ class Crytpo {
         "data": List<dynamic>.from(data.map((x) => x.toJson())),
         "status": status.toJson(),
       };
+
+  @override
+  List<Object> get props => [data, status];
 }
 
-class Coin {
+class Coin extends Equatable {
   Coin({
     this.id,
     this.name,
@@ -94,6 +99,23 @@ class Coin {
         "platform": platform,
         "quote": Map.from(quote).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),
       };
+
+  @override
+  List<Object> get props => [
+        id,
+        name,
+        symbol,
+        slug,
+        cmcRank,
+        numMarketPairs,
+        circulatingSupply,
+        totalSupply,
+        maxSupply,
+        lastUpdated,
+        dateAdded,
+        platform,
+        quote,
+      ];
 }
 
 class Quote {
