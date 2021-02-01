@@ -21,6 +21,20 @@ class CryptoClient {
       return coins;
     } catch (e) {
       print(e);
+      return e;
+    }
+  }
+
+  Future<List<Coin>> fetchCoinData({int start = 1, int limit = 20}) async {
+    final String url = '$baseUrl/v1/cryptocurrency/listings/latest?start=$start&limit=$limit';
+    try {
+      final response = await http.get(url, headers: {"X-CMC_PRO_API_KEY": apiKey});
+      final json = Crytpo.fromJson(jsonDecode(response.body));
+      List<Coin> coins = json.data;
+      return coins;
+    } catch (e) {
+      print(e);
+      return e;
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:crytpo_project/blocs/bloc.dart';
 import 'package:crytpo_project/clients/crypto_client.dart';
 import 'package:crytpo_project/repositories/repositories.dart';
+import 'package:crytpo_project/widgets/coin_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
@@ -59,8 +60,9 @@ class HomePage extends StatelessWidget {
           child: ListView.builder(
             itemCount: state.crypto.length,
             itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                title: Text(state.crypto[index].quote['USD'].price.toString()),
+              return CoinTile(
+                coinName: state.crypto[index].name,
+                coinValue: state.crypto[index].quote['USD'].price,
               );
             },
           ),
