@@ -1,25 +1,65 @@
 import 'package:crytpo_project/models/models.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+
+// enum CryptoStatus { initial, success, failure }
+
+// class CryptoState extends Equatable {
+//   final List<Coin> coins;
+//   final bool limitReached;
+//   final CryptoStatus status;
+
+//   const CryptoState({
+//     this.coins = const <Coin>[],
+//     this.limitReached = false,
+//     this.status = CryptoStatus.initial,
+//   });
+
+//   CryptoState copyWith({
+//     CryptoStatus status,
+//     List<Coin> coins,
+//     bool hasReachedMax,
+//   }) {
+//     return CryptoState(
+//       status: status ?? this.status,
+//       coins: coins ?? this.coins,
+//       limitReached: limitReached ?? this.limitReached,
+//     );
+//   }
+
+//   @override
+//   List<Object> get props => [coins, limitReached];
+// }
 
 abstract class CryptoState extends Equatable {
-  const CryptoState();
-
   @override
   List<Object> get props => [];
 }
 
-class CryptoEmpty extends CryptoState {}
+class CryptoEmptyState extends CryptoState {}
 
-class CryptoLoading extends CryptoState {}
+class CryptoLoadingState extends CryptoState {}
 
-class CryptoLoaded extends CryptoState {
-  final List<Coin> crypto;
+class CryptoLoadedState extends CryptoState {
+  final List<Coin> coins;
+  final bool limitReached;
 
-  const CryptoLoaded({@required this.crypto}) : assert(crypto != null);
+  CryptoLoadedState({
+    this.coins = const <Coin>[],
+    this.limitReached,
+  });
+
+  CryptoState copyWith({
+    List<Coin> coins,
+    bool hasReachedMax,
+  }) {
+    return CryptoLoadedState(
+      coins: coins ?? this.coins,
+      limitReached: limitReached ?? this.limitReached,
+    );
+  }
 
   @override
-  List<Object> get props => [crypto];
+  List<Object> get props => [coins, limitReached];
 }
 
-class CryptoError extends CryptoState {}
+class CryptoErrorState extends CryptoState {}

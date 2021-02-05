@@ -7,7 +7,10 @@ class CryptoRepository {
 
   CryptoRepository({@required this.cryptoClient}) : assert(cryptoClient != null);
 
-  Future<List<Coin>> fetchCoins() async {
-    return await cryptoClient.fetchLastestCoinsFromApi();
+  Future<List<Coin>> fetchCoins([int startIndex = 1, int limit = 10]) async {
+    return await cryptoClient.fetchLastestCoinsFromApi(
+      startIndex: startIndex,
+      limit: limit,
+    );
   }
 }

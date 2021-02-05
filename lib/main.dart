@@ -1,14 +1,13 @@
 import 'package:crytpo_project/blocs/bloc.dart';
 import 'package:crytpo_project/clients/crypto_client.dart';
 import 'package:crytpo_project/repositories/repositories.dart';
+import 'package:crytpo_project/screens/home/home.dart';
 import 'package:crytpo_project/widgets/coin_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
-import 'models/crypto.dart';
-
-class SimpleBlocDelegate extends BlocDelegate {
+class SimpleBlocDelegate extends BlocObserver {
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
@@ -17,8 +16,7 @@ class SimpleBlocDelegate extends BlocDelegate {
 }
 
 void main() {
-  BlocSupervisor.delegate = SimpleBlocDelegate();
-
+  Bloc.observer = SimpleBlocDelegate();
   final CryptoRepository repository = CryptoRepository(cryptoClient: CryptoClient(httpClient: http.Client()));
   runApp(MyApp(repository: repository));
 }
@@ -26,54 +24,20 @@ void main() {
 class MyApp extends StatelessWidget {
   final CryptoRepository repository;
 
-  MyApp({this.repository}) : assert(repository != null);
+  MyApp({this.repository});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Crypto App',
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Crypto'),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CryptoBloc>(
+          create: (BuildContext context) => CryptoBloc(repository: repository)..add(FetchCryptoEvent()),
         ),
-        body: BlocProvider(
-          create: (context) => CryptoBloc(repository: repository),
-          child: HomePage(),
-        ),
+      ],
+      child: MaterialApp(
+        title: 'Crypto App',
+        home: HomeScreen(repository: repository),
       ),
     );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<CryptoBloc, CryptoState>(builder: (context, state) {
-      if (state is CryptoEmpty) {
-        BlocProvider.of<CryptoBloc>(context).add(FetchCrypto());
-      }
-
-      if (state is CryptoLoaded) {
-        return RefreshIndicator(
-          onRefresh: () async {
-            BlocProvider.of<CryptoBloc>(context).add(CryptoRefreshEvent());
-          },
-          child: ListView.builder(
-            itemCount: state.crypto.length,
-            itemBuilder: (BuildContext context, int index) {
-              return CoinTile(
-                coinName: state.crypto[index].name,
-                coinValue: state.crypto[index].quote['USD'].price,
-              );
-            },
-          ),
-        );
-      }
-      if (state is CryptoError) {
-        return Center(child: Text('Failed to fetch crypto'));
-      }
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    });
   }
 }

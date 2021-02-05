@@ -1,19 +1,10 @@
 import 'package:equatable/equatable.dart';
 
 abstract class CryptoEvent extends Equatable {
-  const CryptoEvent();
-}
-
-class FetchCrypto extends CryptoEvent {
-  const FetchCrypto();
-
   @override
   List<Object> get props => [];
 }
 
-class CryptoRefreshEvent extends CryptoEvent {
-  const CryptoRefreshEvent();
+class FetchCryptoEvent extends CryptoEvent {}
 
-  @override
-  List<Object> get props => [];
-}
+class CryptoRefreshEvent extends CryptoEvent {}

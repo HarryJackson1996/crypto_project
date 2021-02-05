@@ -11,10 +11,10 @@ class CoinTile extends StatelessWidget {
     return Card(
       elevation: 5.0,
       child: Container(
-        height: 50,
-        color: Color.fromRGBO(150, 150, 150, 1),
+        height: 100,
+        color: Color.fromRGBO(230, 230, 230, 1),
         child: Row(
-          children: [Text(coinName), Text(coinValue.toString())],
+          children: [Text(coinName + ": "), Text(coinValue.toString())],
         ),
       ),
     );
