@@ -4,33 +4,78 @@ import 'package:crytpo_project/repositories/repositories.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc.dart';
+import 'package:rxdart/rxdart.dart';
+
+const _coinLimit = 20;
 
 class CryptoBloc extends Bloc<CryptoEvent, CryptoState> {
   final CryptoRepository repository;
 
-  CryptoBloc({@required this.repository}) : assert(repository != null);
+  CryptoBloc({@required this.repository})
+      : assert(repository != null),
+        super(CryptoEmptyState());
 
   @override
-  CryptoState get initialState => CryptoEmpty();
+  Stream<Transition<CryptoEvent, CryptoState>> transformEvents(
+    Stream<CryptoEvent> events,
+    TransitionFunction<CryptoEvent, CryptoState> transitionFn,
+  ) {
+    return super.transformEvents(
+      events.debounceTime(const Duration(milliseconds: 500)),
+      transitionFn,
+    );
+  }
 
   @override
   Stream<CryptoState> mapEventToState(CryptoEvent event) async* {
-    if (event is FetchCrypto) {
-      yield CryptoLoading();
-    }
-    if (event is CryptoRefreshEvent) {
+    final currentState = state;
+    if (event is FetchCryptoEvent) {
       try {
-        final List<Coin> crypto = await repository.fetchCoins();
-        yield CryptoLoaded(crypto: crypto);
+        if (currentState is CryptoEmptyState) {
+          final coins = await repository.fetchCoins();
+          yield CryptoLoadedState(coins: coins, limitReached: false);
+          return;
+        }
+        if (currentState is CryptoLoadedState) {
+          final coins = await repository.fetchCoins(currentState.coins.length + 1);
+          yield CryptoLoadedState(
+            coins: currentState.coins + coins,
+            limitReached: false,
+          );
+        }
       } catch (_) {
-        yield CryptoError();
+        yield CryptoErrorState();
       }
     }
-    try {
-      final List<Coin> crypto = await repository.fetchCoins();
-      yield CryptoLoaded(crypto: crypto);
-    } catch (_) {
-      yield CryptoError();
-    }
+    // if (event is FetchCryptoEvent) {
+    //   yield* _doFetch(event);
+    //   // yield await _mapPostFetchedToState(state);
+    // }
   }
+
+  Future<CryptoState> _mapPostFetchedToState(CryptoState state) async {
+    // if (state.limitReached) return state;
+    // try {
+    //   if (state.status == CryptoStatus.initial) {
+    //     final coins = await repository.fetchCoins();
+    //     return state.copyWith(
+    //       status: CryptoStatus.success,
+    //       coins: coins,
+    //       hasReachedMax: _limitReached(coins.length),
+    //     );
+    //   }
+    //   final coins = await repository.fetchCoins(state.coins.length + 1);
+    //   return coins.isEmpty
+    //       ? state.copyWith(hasReachedMax: true)
+    //       : state.copyWith(
+    //           status: CryptoStatus.success,
+    //           coins: List.of(state.coins)..addAll(coins),
+    //           hasReachedMax: _limitReached(coins.length),
+    //         );
+    // } on Exception {
+    //   return state.copyWith(status: CryptoStatus.failure);
+    // }
+  }
+
+  bool _limitReached(int coinCount) => coinCount <= _coinLimit ? false : true;
 }
