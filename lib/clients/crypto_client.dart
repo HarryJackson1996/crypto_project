@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:crytpo_project/models/crypto.dart';
+import 'package:crytpo_project/models/coin.dart';
+import 'package:crytpo_project/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,7 +13,7 @@ class CryptoClient {
     @required this.httpClient,
   }) : assert(httpClient != null);
 
-  Future<List<Coin>> fetchLastestCoinsFromApi({int startIndex = 1, int limit = 20}) async {
+  Future<List<Coin>> fetchCoinsFromApi({int startIndex = 1, int limit = 20}) async {
     final String url = '$baseUrl/v1/cryptocurrency/listings/latest?start=$startIndex&limit=$limit';
     try {
       final response = await http.get(url, headers: {"X-CMC_PRO_API_KEY": apiKey});
@@ -26,13 +27,14 @@ class CryptoClient {
     }
   }
 
-  Future<List<Coin>> fetchCoinData({int start = 1, int limit = 20}) async {
-    final String url = '$baseUrl/v1/cryptocurrency/listings/latest?start=$start&limit=$limit';
+  Future<CryptoData> fetchCoinData({String coinName}) async {
+    final String url = '$baseUrl/v1/cryptocurrency/info?symbol=$coinName';
     try {
       final response = await http.get(url, headers: {"X-CMC_PRO_API_KEY": apiKey});
-      final json = Crytpo.fromJson(jsonDecode(response.body));
-      List<Coin> coins = json.data;
-      return coins;
+      final json = CryptoData.fromJson(jsonDecode(response.body));
+      var a = json;
+      print(a);
+      return null;
     } catch (e) {
       print(e);
       return e;

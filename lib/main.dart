@@ -1,11 +1,15 @@
 import 'package:crytpo_project/blocs/bloc.dart';
+import 'package:crytpo_project/blocs/tab_bloc/tab_bloc.dart';
 import 'package:crytpo_project/clients/crypto_client.dart';
+import 'package:crytpo_project/consts/consts.dart';
 import 'package:crytpo_project/repositories/repositories.dart';
-import 'package:crytpo_project/screens/home/home.dart';
-import 'package:crytpo_project/widgets/coin_tile.dart';
+import 'package:crytpo_project/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'models/coin.dart';
 
 class SimpleBlocDelegate extends BlocObserver {
   @override
@@ -15,9 +19,19 @@ class SimpleBlocDelegate extends BlocObserver {
   }
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(CoinAdapter());
+  Hive.registerAdapter(QuoteAdapter());
+  await Hive.openBox<Coin>(coinBookmarkBox);
   Bloc.observer = SimpleBlocDelegate();
-  final CryptoRepository repository = CryptoRepository(cryptoClient: CryptoClient(httpClient: http.Client()));
+  final CryptoRepository repository = CryptoRepository(
+    cryptoClient: CryptoClient(
+      httpClient: http.Client(),
+    ),
+    box: Hive.box<Coin>(coinBookmarkBox),
+  );
   runApp(MyApp(repository: repository));
 }
 
@@ -31,8 +45,12 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<CryptoBloc>(
-          create: (BuildContext context) => CryptoBloc(repository: repository)..add(FetchCryptoEvent()),
+          create: (BuildContext context) => CryptoBloc(repository: repository)
+            ..add(
+              FetchCryptoEvent(),
+            ),
         ),
+        BlocProvider<TabBloc>(create: (context) => TabBloc()),
       ],
       child: MaterialApp(
         title: 'Crypto App',

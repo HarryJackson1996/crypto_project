@@ -1,10 +1,13 @@
+import 'package:crytpo_project/models/coin.dart';
 import 'package:flutter/material.dart';
 
 class CoinTile extends StatelessWidget {
-  final String coinName;
-  final double coinValue;
-
-  CoinTile({this.coinName, this.coinValue}) : assert(coinName != null && coinValue != null);
+  final Coin coin;
+  final Function onPressed;
+  CoinTile({
+    this.coin,
+    this.onPressed,
+  }) : assert(coin != null);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +17,17 @@ class CoinTile extends StatelessWidget {
         height: 100,
         color: Color.fromRGBO(230, 230, 230, 1),
         child: Row(
-          children: [Text(coinName + ": "), Text(coinValue.toString())],
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(coin.name + ": "),
+            IconButton(
+              icon: Icon(
+                Icons.bookmark,
+                color: coin.bookmarked ? Colors.green : Colors.white,
+              ),
+              onPressed: onPressed,
+            ),
+          ],
         ),
       ),
     );
